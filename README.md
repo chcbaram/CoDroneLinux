@@ -1,0 +1,2 @@
+# CoDroneLinux
+DRONE_SERIAL
