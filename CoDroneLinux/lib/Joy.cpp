@@ -23,10 +23,10 @@
 #define NAME_LENGTH 128
 
 
-#define JOY_ROLL		0
-#define JOY_PITCH		1
+#define JOY_ROLL			0
+#define JOY_PITCH			1
 #define JOY_YAW			2
-#define JOY_THRUTLE		5
+#define JOY_THRUTLE		3 // 5 PS4
 
 
 

@@ -1092,7 +1092,9 @@ void CoDroneClass::Send_Ping()
 void CoDroneClass::AutoConnect(byte mode)
 {	
 	// Connected check
+  printf("LinkStateCheck in\n");
 	LinkStateCheck();		
+	printf("LinkStateCheck out\n");
   if (linkState  == linkMode_Connected)
   {
     pairing = true;
@@ -1366,7 +1368,8 @@ void CoDroneClass::Receive()
 	if (DRONE_SERIAL.available() > 0)
   {
     int input = DRONE_SERIAL.read();
-    
+
+
     #if defined(FIND_HWSERIAL1)
 	  if(debugMode == 1)
 	  {

@@ -1,5 +1,6 @@
 #include "main.h"
-
+#include "Arduino.h"
+#include "CoDrone.h" // 코드론을 사용하기 위한 헤더파일
 
 
 extern void setup();
@@ -120,6 +121,15 @@ void run( char *pUartPort )
 	uint32_t tTimeSend;
 	bool Fly = false;
 
+	printf("Connect CoDrone..\n");
+  CoDrone.begin(115200);  // sets up the connection to the drone using the bluetooth module at 115200bps (bits per second)
+  CoDrone.AutoConnect(NearbyDrone);    // finds and connects to a drone that is nearby
+  CoDrone.DroneModeChange(Flight); // Changes the drone so that it is now in flight mode
+
+  CoDrone.LedColor(EyeNone, Green, 7);
+
+  printf("OK..\n");
+
 	while(1)
 	{
 		Ret = Joy_Update();
@@ -130,50 +140,50 @@ void run( char *pUartPort )
 
 			//printf("Run: type %d, time %d, number %d, value %d\n", Joy.js_type, Joy.js_time, Joy.js_number, Joy.js_value);
 			//printf("Axis %d, %d \n", Joy.AxisValue[0], Joy.AxisValue[1] );
-			//printf("Axis %f, %f, %f, %f \n", Joy.fRoll, Joy.fPitch, Joy.fYaw, Joy.fThrutle );
+			printf("Axis R %f, P %f, Y %f, T %f \n", Joy.fRoll, Joy.fPitch, Joy.fYaw, Joy.fThrutle );
 
-			if( Joy.ButtonValue[0] == true )
-			{
-				printf("RESET_YAW\n");
-				Fly = true;
-			}
+
+      if( Joy.ButtonValue[6] == true )
+      {
+        CoDrone.LedColor(EyeNone, Green, 7);
+        delay(100);
+      }
+      if( Joy.ButtonValue[8] == true )
+      {
+        CoDrone.LedColor(EyeMix, Green, 7);
+        delay(100);
+      }
 
 			if( Joy.ButtonValue[1] == true )
 			{
 				printf("STOP\n");
-				Fly = false;
-			}			
+				CoDrone.FlightEvent(Stop);
+			}
 
-			if( Joy.ButtonValue[2] == true )
-			{
-				printf("AB MODE\n");
-				Fly = false;
-			}			
+     if( Joy.ButtonValue[10] == true )
+      {
+        printf("Landing\n");
+        CoDrone.FlightEvent(Landing);
+      }
 
-			if( Joy.ButtonValue[3] == true )
-			{
-				printf("RC MODE\n");
-				Fly = false;
-			}			
-
+     if( Joy.ButtonValue[11] == true )
+      {
+        printf("TakeOff\n");
+        CoDrone.FlightEvent(TakeOff);
+      }
 		}
 
-		if( (millis() - tTime) > 1000 )
-		{
-			tTime = millis();
 
-			//printf("Fly:%d, Battery:%d \n", DF_Ret.Flight, DF_Ret.Battery);
-		}
+	  // PAIRING is set to true in AutoConnect if they connect together
+	  if (PAIRING == true)  // Check to see that we are paired before trying to fly
+	  {
+	    YAW       = Joy.fYaw     * 100;
+	    THROTTLE  = Joy.fThrutle * 100;
+	    ROLL      = Joy.fRoll    * 100;
+	    PITCH     = Joy.fPitch   * 100;
 
-		if( (millis() - tTimeSend) > 100 )
-		{
-			tTimeSend = millis();
-
-			//if( Fly == true )
-			//	DF_SendPacket( Joy.fRoll*100, Joy.fPitch*100, Joy.fYaw*100, Joy.fThrutle*100, 0x00 );
-			//else
-			//	DF_SendPacket( Joy.fRoll*100, Joy.fPitch*100, Joy.fYaw*100, Joy.fThrutle*100, STOP );
-		}
+	    CoDrone.Control(SEND_INTERVAL); // sends the values to the codrone, it will make sure that SEND_INTERVAL (~50ms) time has passed before it sends again
+	  }
 	}		
 }
 
